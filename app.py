@@ -44,19 +44,28 @@ def load_prices(tickers: list, years: int) -> pd.DataFrame:
     end   = datetime.today()
     start = end - timedelta(days=max(years, 5) * 365)
     raw   = yf.download(tickers, start=start, end=end, auto_adjust=True, progress=False)
+    if raw is None or raw.empty:
+        return pd.DataFrame()
     if isinstance(raw.columns, pd.MultiIndex):
         prices = raw["Close"]
+    elif "Close" in raw.columns:
+        prices = raw[["Close"]]
+        prices.columns = tickers[:1]
     else:
-        prices = raw[["Close"]] if "Close" in raw else raw
-    prices = prices[tickers] if all(t in prices.columns for t in tickers) else prices
-    return prices.dropna()
+        prices = raw
+    available = [t for t in tickers if t in prices.columns]
+    return prices[available].dropna()
 
 with st.spinner("Fetching live data from Yahoo Finance…"):
     try:
         prices_a = load_prices(TICKERS_A, years_a + 1)
         prices_b = load_prices(TICKERS_B, min(years_b, 20))
+        if prices_a.empty or prices_b.empty:
+            raise ValueError("yfinance returned no data — market may be closed or tickers unavailable.")
         rets_a   = prices_a.pct_change().dropna()
         rets_b   = prices_b.pct_change().dropna()
+        if rets_a.empty or rets_b.empty:
+            raise ValueError("Not enough data to compute returns.")
         data_ok  = True
     except Exception as e:
         st.error(f"Data load failed: {e}")
