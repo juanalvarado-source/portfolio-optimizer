@@ -177,14 +177,33 @@ if data_ok:
                     legend=dict(orientation="h", yanchor="bottom", y=1.02))
                 st.plotly_chart(fig, use_container_width=True)
 
-                # Weights breakdown
-                w_df = pd.DataFrame({
-                    "Asset":         [f"{t} — {names[t]}" for t in tickers],
-                    "Max Sharpe %":  [f"{w*100:.1f}%" for w in opt_w],
-                    "Risk Parity %": [f"{w*100:.1f}%" for w in rp_w],
-                    "Equal-Wt %":    [f"{w*100:.1f}%" for w in eq_w],
-                })
-                st.dataframe(w_df, hide_index=True, use_container_width=True)
+                # Asset allocation bar chart
+                asset_labels = [f"{t}\n{names[t]}" for t in tickers]
+                fig_bar = go.Figure()
+                fig_bar.add_trace(go.Bar(
+                    name=f"Max Sharpe (Sharpe {opt_s:.2f})",
+                    x=asset_labels, y=[w * 100 for w in opt_w],
+                    marker_color="gold",
+                    text=[f"{w*100:.0f}%" for w in opt_w], textposition="outside"))
+                fig_bar.add_trace(go.Bar(
+                    name=f"Risk Parity (Sharpe {rp_s:.2f})",
+                    x=asset_labels, y=[w * 100 for w in rp_w],
+                    marker_color="cyan",
+                    text=[f"{w*100:.0f}%" for w in rp_w], textposition="outside"))
+                fig_bar.add_trace(go.Bar(
+                    name=f"Equal-Weight (Sharpe {eq_s:.2f})",
+                    x=asset_labels, y=[w * 100 for w in eq_w],
+                    marker_color="salmon",
+                    text=[f"{w*100:.0f}%" for w in eq_w], textposition="outside"))
+                fig_bar.update_layout(
+                    barmode="group",
+                    yaxis_title="Allocation (%)",
+                    yaxis_range=[0, 85],
+                    height=320,
+                    margin=dict(t=10, b=10),
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02))
+                st.caption("**Why each strategy lands where it does — asset allocation behind each point:**")
+                st.plotly_chart(fig_bar, use_container_width=True)
 
                 projected = capital * (1 + opt_r) ** horizon
                 st.info(
