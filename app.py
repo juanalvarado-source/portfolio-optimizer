@@ -151,28 +151,29 @@ if data_ok:
                 fig = go.Figure()
                 fig.add_trace(go.Scatter(
                     x=vols, y=ret_vals, mode="markers",
-                    marker=dict(color=sharpes, colorscale="Viridis", size=4, opacity=0.4),
+                    marker=dict(color=sharpes, colorscale="Viridis", size=4, opacity=0.4,
+                               showscale=True, colorbar=dict(title="Sharpe Ratio", thickness=12, len=0.7)),
                     name="Simulated", hovertemplate="Risk: %{x:.1%}<br>Return: %{y:.1%}"))
                 fig.add_trace(go.Scatter(
                     x=[opt_v], y=[opt_r], mode="markers+text",
                     marker=dict(color="gold", size=16, symbol="star"),
-                    text=[f"Optimal<br>Sharpe {opt_s:.2f}"], textposition="top center",
+                    text=[f"Max Sharpe {opt_s:.2f}"], textposition="top right",
                     name="Max Sharpe"))
                 fig.add_trace(go.Scatter(
                     x=[rp_v], y=[rp_r], mode="markers+text",
                     marker=dict(color="cyan", size=14, symbol="diamond"),
-                    text=[f"Risk Parity<br>Sharpe {rp_s:.2f}"], textposition="top center",
+                    text=[f"Risk Parity {rp_s:.2f}"], textposition="bottom left",
                     name="Risk Parity"))
                 fig.add_trace(go.Scatter(
                     x=[eq_v], y=[eq_r], mode="markers+text",
                     marker=dict(color="red", size=14, symbol="x"),
-                    text=[f"Equal-Weight<br>Sharpe {eq_s:.2f}"], textposition="top center",
+                    text=[f"Equal-Weight {eq_s:.2f}"], textposition="top left",
                     name="Equal-Weight"))
                 fig.update_layout(
                     xaxis_title="Annual Risk (Volatility)",
                     yaxis_title="Annual Return",
                     xaxis_tickformat=".0%", yaxis_tickformat=".0%",
-                    height=380, margin=dict(t=10, b=10),
+                    height=420, margin=dict(t=20, b=10),
                     legend=dict(orientation="h", yanchor="bottom", y=1.02))
                 st.plotly_chart(fig, use_container_width=True)
 
